@@ -28,7 +28,7 @@
     WARNING: Before running this, ensure that all Revocation Configs have a current Signing Certificate assigned with the -UpdateRevocationConfigs Argument.
 
     .PARAMETER Deploy
-    Can be used for a quick OCSP Deployment. Installs and configured the Role, then creates Revocation Configs and Requests, if any.
+    Can be used for a quick OCSP Deployment. Installs and configures the Role, then creates Revocation Configs and Requests, if any.
 
     .PARAMETER DeleteRevocationConfigs
     Removes all currently defined Revocation Configurations.
@@ -47,56 +47,56 @@
 param(
     [Parameter(
         ParameterSetName="CreateRevocationConfigs",
-        Mandatory=$False
+        Mandatory=$True
     )]
     [Switch]
     $CreateRevocationConfigs = $False,
 
     [Parameter(
         ParameterSetName="CreateRequests",
-        Mandatory=$False
+        Mandatory=$True
     )]
     [Switch]
     $CreateRequests = $False,
 
     [Parameter(
         ParameterSetName="InstallCerts",
-        Mandatory=$False
+        Mandatory=$True
     )]
     [Switch]
     $InstallCerts = $False,
 
     [Parameter(
         ParameterSetName="UpdateRevocationConfigs",
-        Mandatory=$False
+        Mandatory=$True
     )]
     [Switch]
     $UpdateRevocationConfigs = $False,
 
     [Parameter(
         ParameterSetName="ArchiveCerts",
-        Mandatory=$False
+        Mandatory=$True
     )]
     [Switch]
     $ArchiveCerts = $False,
 
     [Parameter(
         ParameterSetName="Deploy",
-        Mandatory=$False
+        Mandatory=$True
     )]
     [Switch]
     $Deploy = $False,
 
     [Parameter(
         ParameterSetName="DeleteRevocationConfigs",
-        Mandatory=$False
+        Mandatory=$True
     )]
     [Switch]
     $DeleteRevocationConfigs = $False,
 
     [Parameter(
         ParameterSetName="ShowConfig",
-        Mandatory=$False
+        Mandatory=$True
     )]
     [Switch]
     $ShowConfig = $False

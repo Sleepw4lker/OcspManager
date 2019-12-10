@@ -5,7 +5,7 @@ Function Invoke-ArchiveCerts {
 
     process {
 
-        $RevocationConfig = Get-OcspRevocationConfiguration
+        $RevocationConfig = Get-OcspRevocationConfiguration | Where-Object { $Null -ne $_.SigningCertificate }
 
         Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object {
             $_.EnhancedKeyUsageList -match "1.3.6.1.5.5.7.3.9"
