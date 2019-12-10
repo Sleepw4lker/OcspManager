@@ -40,12 +40,15 @@ Function Invoke-CreateRevocationConfigs {
                 If ($_.DeltaCdp) {
                     $Arguments.Add("DeltaCdp", $_.DeltaCdp)
                 }
+
+                If ($_.SignatureHashAlgorithm) {
+                    $Arguments.Add("SignatureHashAlgorithm", $_.SignatureHashAlgorithm)
+                }
     
                 # Create the Revocation Configuration if not already present, and return its Identifier to show we did anything
                 New-OCSPRevocationConfiguration @Arguments | Select-Object -Property Identifier
     
             }
-    
         }
     }
 }

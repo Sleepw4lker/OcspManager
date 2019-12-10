@@ -6,22 +6,32 @@
 
     .PARAMETER CreateRevocationConfigs
     1st Step. Creates Revocation Configurations out of what is defined in the Config.xml.
+    Can also create "Online" Configurations for Auto-Enrolled Signing Certificates.
     
     .PARAMETER CreateRequests
-    2nd Step. Reads the current OCSP Configuration and creates Certificate Signing Requests (CSRs) for each CA Certificate.
+    2nd Step (Only applies for "Offline" Configurations).
+    Reads the current OCSP Configuration and creates Certificate Signing Requests (CSRs) for each CA Certificate.
     Applies the Authority Key Identifier (AKI) Extension to the Certificate Request, as a Microsoft CA may have more than one Private Key.
 
     .PARAMETER InstallCerts
-    3rd Step. After the Certificates have been issued by the respective CAs, install all of them on the local machine.
+    3rd Step (Only applies for "Offline" Configurations).
+    After the Certificates have been issued by the respective CAs, install all of them on the local machine.
 
     .PARAMETER UpdateRevocationConfigs
-    4th Step. Update all OCSP Revocation Configurations found on the machine.
+    4th Step (Only applies for "Offline" Configurations).
+    Update all OCSP Revocation Configurations found on the machine.
     Searches for the newest (latest Issuance Date) Signing Certificate for each CA/AKI Combination and applies the Signing Certificate to the respective Revocation Configuration.
     It also tries to assign Private Key Permissions to the Certificate Private Key Objects for the OCSP Responder.
 
     .PARAMETER ArchiveCerts
     5th Step. Identifies Signing Certificates that are not in use and sets the Archive Bit on them so that they disappear from the Certificate Store.
     WARNING: Before running this, ensure that all Revocation Configs have a current Signing Certificate assigned with the -UpdateRevocationConfigs Argument.
+
+    .PARAMETER Deploy
+    Can be used for a quick OCSP Deployment. Installs and configured the Role, then creates Revocation Configs and Requests, if any.
+
+    .PARAMETER DeleteRevocationConfigs
+    Removes all currently defined Revocation Configurations.
 
     .PARAMETER ShowConfig
     Prints the current Configuration. A Helper to ensure the Config.xml File is as desired.
@@ -33,7 +43,7 @@
 
 #>
 
-[cmdletbinding(DefaultParameterSetName="CreateRequests")]
+[cmdletbinding(DefaultParameterSetName="None")]
 param(
     [Parameter(
         ParameterSetName="CreateRevocationConfigs",
@@ -71,6 +81,20 @@ param(
     $ArchiveCerts = $False,
 
     [Parameter(
+        ParameterSetName="Deploy",
+        Mandatory=$False
+    )]
+    [Switch]
+    $Deploy = $False,
+
+    [Parameter(
+        ParameterSetName="DeleteRevocationConfigs",
+        Mandatory=$False
+    )]
+    [Switch]
+    $DeleteRevocationConfigs = $False,
+
+    [Parameter(
         ParameterSetName="ShowConfig",
         Mandatory=$False
     )]
@@ -93,7 +117,10 @@ If (-not (
 }
 
 # Check if we have an OCSP Responder installed on the machine
-If ($False -eq (Get-WindowsFeature -Name ADCS-Online-Cert).Installed) {
+Try {
+    [void](New-Object -ComObject "CertAdm.OCSPAdmin")
+}
+Catch {
     Write-Warning -Message "This Script requires the Microsoft Online Responder to be installed on the machine! Aborting."
     return
 }
@@ -130,9 +157,15 @@ If ($ArchiveCerts.IsPresent) {
     Invoke-ArchiveCerts
 }
 
-If ($ShowConfig.IsPresent) {
+If ($Deploy.IsPresent) {
+    Invoke-Deploy
+}
 
+If ($DeleteRevocationConfigs.IsPresent) {
+    Invoke-DeleteRevocationConfigs
+}
+
+If ($ShowConfig.IsPresent) {
     $Script:Config.Config | Format-List
     return
-
 }

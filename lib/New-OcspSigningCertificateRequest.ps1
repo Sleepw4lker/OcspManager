@@ -19,9 +19,10 @@ Function New-OcspSigningCertificateRequest {
         $Aki,
 
         [Parameter(Mandatory=$False)]
-        [ValidateScript({$Null -ne (certutil -csplist | find "$($_)")})] # Should be converted to PoSH only, but works for now
+        [ValidateNotNullOrEmpty()]
+        #[ValidateScript({$Null -ne (certutil -csplist | find "$($_)")})] # Should be converted to PoSH only, but works for now
         [String]
-        $Ksp = "Microsoft Enhanced RSA and AES Cryptographic Provider",
+        $Ksp = "Microsoft Software Key Storage Provider",
 
         [Parameter(Mandatory=$False)]
         [ValidateSet(2048,3072,4096)]
@@ -131,7 +132,7 @@ Function New-OcspSigningCertificateRequest {
             # https://docs.microsoft.com/en-us/windows/desktop/api/certenroll/nf-certenroll-ix509extensionauthoritykeyidentifier-initializeencode
             $AkiExtension.InitializeEncode(
                 $XCN_CRYPT_STRING_BASE64, 
-                $(Convert-DERToBASE64 -String $Aki)
+                $(ConvertTo-BASE64encodedDER -String $Aki)
             )
 
             # Adding the Extension to the Certificate

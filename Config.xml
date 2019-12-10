@@ -7,7 +7,7 @@
     <KeyLength>2048</KeyLength>
     <KspName>Utimaco CryptoServer Key Storage Provider</KspName>
     <RevocationConfig>
-        <Name>Fabrikam Issuing CA 1 (0)</Name>
+        <Name>Fabrikam Issuing CA 1 (Key 0)</Name>
         <Type>Online</Type>
         <CaCertFile>Fabrikam Issuing CA 1.crt</CaCertFile>
         <ConfigString>adcsca02.corp.fabrikam.com\Fabrikam Issuing CA 1</ConfigString>
@@ -19,7 +19,7 @@
         <DeltaCdp>http://pki.fabrikam.com/CertData/Fabrikam%20Issuing%20CA%201+.crl</DeltaCdp>
     </RevocationConfig>
     <RevocationConfig>
-        <Name>Fabrikam Issuing CA 2 (0)</Name>
+        <Name>Fabrikam Issuing CA 2 (Key 0)</Name>
         <Type>Offline</Type>
         <CaCertFile>Fabrikam Issuing CA 2.crt</CaCertFile>
         <ConfigString>adcsca03.corp.fabrikam.com\Fabrikam Issuing CA 2</ConfigString>

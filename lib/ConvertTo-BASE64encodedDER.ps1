@@ -1,5 +1,4 @@
-# What about Convert-DERToBASE64
-Function Convert-DERToBASE64 {
+Function ConvertTo-BASE64encodedDER {
 
     # Converts a String to a BASE64-encoded Byte Array
     # $XCN_CRYPT_STRING_BASE64 = 0x1
