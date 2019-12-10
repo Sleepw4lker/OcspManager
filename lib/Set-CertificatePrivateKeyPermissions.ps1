@@ -66,7 +66,14 @@ Function Set-CertificateKeyPermissions {
             ([System.Security.Cryptography.CngPropertyOptions]::Persist -bor $DACL_SECURITY_INFORMATION)
             )
 
-        $PrivateKeyObject.Key.SetProperty($CngProperty2)
+        Try {
+            $PrivateKeyObject.Key.SetProperty($CngProperty2)
+        }
+        Catch {
+            Write-Warning -Message "Unable to set Private Key Security Information for Certificate $($Certificate.Thumbprint)."
+            Write-Warning -Message "Set Permissions manually: $($Identifier.Translate([System.Security.Principal.NTAccount]).Value) needs Read Permission on the Private Key."
+            return
+        }
 
     }
 

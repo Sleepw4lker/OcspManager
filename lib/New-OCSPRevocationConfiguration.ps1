@@ -12,11 +12,6 @@ Function New-OCSPRevocationConfiguration {
         [String]
         $ComputerName = $env:computername,
 
-        [Parameter(Mandatory=$False)]
-        [ValidateNotNullorEmpty()]
-        [String]
-        $ConfigString,
-
         [Parameter(Mandatory=$True)]
         [ValidateNotNullorEmpty()]
         [System.Security.Cryptography.X509Certificates.X509Certificate]
@@ -26,6 +21,16 @@ Function New-OCSPRevocationConfiguration {
         [ValidateNotNullorEmpty()]
         [String[]]
         $Cdp,
+
+        [Parameter(Mandatory=$False)]
+        [ValidateNotNullorEmpty()]
+        [String[]]
+        $DeltaCdp,
+
+        [Parameter(Mandatory=$False)]
+        [ValidateNotNullorEmpty()]
+        [String]
+        $ConfigString,
 
         [Parameter(Mandatory=$False)]
         [ValidateNotNullorEmpty()]
@@ -50,9 +55,9 @@ Function New-OCSPRevocationConfiguration {
     begin {
         # https://docs.microsoft.com/en-us/windows/win32/api/certadm/nf-certadm-iocspcaconfiguration-get_signingflags
         $OCSP_SF_SILENT 	                        = 0x001 # Acquire a private key silently.
-        $OCSP_SF_USE_CACERT 	                    = 0x002 # Use a CA certificate in this configuration for signing an OCSP response. This option is available only if the responder service is installed on the CA computer.
+        #$OCSP_SF_USE_CACERT 	                    = 0x002 # Use a CA certificate in this configuration for signing an OCSP response. This option is available only if the responder service is installed on the CA computer.
         $OCSP_SF_ALLOW_SIGNINGCERT_AUTORENEWAL 	    = 0x004 # Enable a responder service to automatically transition to a renewed signing certificate.
-        $OCSP_SF_FORCE_SIGNINGCERT_ISSUER_ISCA 	    = 0x008 # Force a delegated signing certificate to be signed by the CA.
+        #$OCSP_SF_FORCE_SIGNINGCERT_ISSUER_ISCA     = 0x008 # Force a delegated signing certificate to be signed by the CA.
         $OCSP_SF_AUTODISCOVER_SIGNINGCERT 	        = 0x010 # Automatically discover a delegated signing certificate.
         $OCSP_SF_MANUAL_ASSIGN_SIGNINGCERT 	        = 0x020 # Manually assign a signing certificate.
         $OCSP_SF_RESPONDER_ID_KEYHASH 	            = 0x040 # A responder ID includes a hash of the public key of the signing certificate (default).
@@ -60,7 +65,6 @@ Function New-OCSPRevocationConfiguration {
         $OCSP_SF_ALLOW_NONCE_EXTENSION              = 0x100 # Enable NONCE extension to be processed by a responder service.
         $OCSP_SF_ALLOW_SIGNINGCERT_AUTOENROLLMENT   = 0x200 # A responder service can enroll for a signing certificate.
 
-        $SigningFlags = 0x0
     }
 
     process {
@@ -82,30 +86,6 @@ Function New-OCSPRevocationConfiguration {
 
         }
 
-        # Save the desired OcspProperties in a collection object
-        $OcspProperties = New-Object -ComObject "CertAdm.OCSPPropertyCollection"
-
-        [void]$OcspProperties.CreateProperty(
-            "BaseCrlUrls",
-            $Cdp
-        )
-
-        [void]$OcspProperties.CreateProperty(
-            "RevocationErrorCode",
-            0
-        )
-
-        # If no Refresh Timeout is specified, the Revocation Configuration will update the CRLs based on their validity periods
-        If ($RefreshTimeout) {
-
-            # Sets the refresh interval (time is specified in milliseconds)
-            [void]$OcspProperties.CreateProperty(
-                "RefreshTimeOut",
-                ($RefreshTimeout * 60 * 1000)
-            )
-
-        }
-
         $OcspAdmin = New-Object -ComObject "CertAdm.OCSPAdmin"
 
         $OcspAdmin.GetConfiguration(
@@ -120,6 +100,9 @@ Function New-OCSPRevocationConfiguration {
         )
 
         $NewConfig.HashAlgorithm = $SignatureHashAlgorithm
+
+        # Initialize empty Signing Flags, populate them with the below Code
+        $SigningFlags = 0x0
 
         If ($ConfigString.IsPresent -and $CertificateTemplate.IsPresent) {
 
@@ -143,9 +126,45 @@ Function New-OCSPRevocationConfiguration {
             $SigningFlags = $SigningFlags -bor $OCSP_SF_ALLOW_NONCE_EXTENSION
         }
 
+        # Apply Signing Flags
         $NewConfig.SigningFlags = $SigningFlags
 
+        # Add the desired OcspProperties to a collection object
+        $OcspProperties = New-Object -ComObject "CertAdm.OCSPPropertyCollection"
+
+        [void]$OcspProperties.CreateProperty(
+            "RevocationErrorCode",
+            0
+        )
+
+        [void]$OcspProperties.CreateProperty(
+            "BaseCrlUrls",
+            $Cdp
+        )
+
+        If ($DeltaCdp) {
+
+            [void]$OcspProperties.CreateProperty(
+                "DeltaCrlUrls",
+                $DeltaCdp
+            )
+
+        }
+
+        # If no Refresh Timeout is specified, the Revocation Configuration will update the CRLs based on their validity periods
+        If ($RefreshTimeout) {
+
+            # Sets the refresh interval (time is specified in milliseconds)
+            [void]$OcspProperties.CreateProperty(
+                "RefreshTimeOut",
+                ($RefreshTimeout * 60 * 1000)
+            )
+
+        }
+
+        # Apply the Properties to the configuration
         $NewConfig.ProviderProperties = $OcspProperties.GetAllProperties()
+
         $NewConfig.ProviderCLSID = "{4956d17f-88fd-4198-b287-1e6e65883b19}"
         $NewConfig.ReminderDuration = 90
 
@@ -159,7 +178,7 @@ Function New-OCSPRevocationConfiguration {
             $NewConfig
         }
         Catch {
-            # Nothing, yet
+            # Nothing, yet. Just don't return anything.
         }
 
     }

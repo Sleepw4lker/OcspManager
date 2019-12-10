@@ -23,7 +23,7 @@ Function Get-OcspSigningCertificate {
                 $CertAki = ($_.Extensions | Where-Object { $_.Oid.Value -eq "2.5.29.35" }).Format(0)
 
                 # If this Certificates AKI matches the CAs SKI, return it for further processing
-                If ($CertAki.ToUpper() -match $Aki.ToUpper()) {
+                If ($CertAki.Replace(" ","").ToUpper() -match $Aki.ToUpper()) {
                     $_
                 }
 
