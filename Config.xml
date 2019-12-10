@@ -7,16 +7,24 @@
     <KeyLength>2048</KeyLength>
     <KspName>Utimaco CryptoServer Key Storage Provider</KspName>
     <RevocationConfig>
+        <Name>Fabrikam Issuing CA 1 (0)</Name>
+        <Type>Online</Type>
         <CaCertFile>Fabrikam Issuing CA 1.crt</CaCertFile>
         <ConfigString>adcsca02.corp.fabrikam.com\Fabrikam Issuing CA 1</ConfigString>
-        <TemplateName>FabrikamOCSPDMZ</TemplateName>
+        <CertificateTemplate>FabrikamOCSPResponseSigning</CertificateTemplate>
+        <SignatureHashAlgorithm>SHA1</SignatureHashAlgorithm>
         <Cdp>ldap:///CN=Fabrikam%20Issuing%20CA%201,CN=Fabrikam%20Issuing%20CA%201,CN=CDP,CN=Public%20Key%20Services,CN=Services,CN=Configuration,DC=corp,DC=fabrikam,DC=com?certificateRevocationList?base?objectClass=cRLDistributionPoint</Cdp>
         <Cdp>http://pki.fabrikam.com/CertData/Fabrikam%20Issuing%20CA%201.crl</Cdp>
+        <DeltaCdp>ldap:///CN=Fabrikam%20Issuing%20CA%201,CN=Fabrikam%20Issuing%20CA%201,CN=CDP,CN=Public%20Key%20Services,CN=Services,CN=Configuration,DC=corp,DC=fabrikam,DC=com?deltaRevocationList?base?objectClass=cRLDistributionPoint</DeltaCdp>
+        <DeltaCdp>http://pki.fabrikam.com/CertData/Fabrikam%20Issuing%20CA%201+.crl</DeltaCdp>
     </RevocationConfig>
     <RevocationConfig>
+        <Name>Fabrikam Issuing CA 2 (0)</Name>
+        <Type>Offline</Type>
         <CaCertFile>Fabrikam Issuing CA 2.crt</CaCertFile>
         <ConfigString>adcsca03.corp.fabrikam.com\Fabrikam Issuing CA 2</ConfigString>
-        <TemplateName>FabrikamOCSPDMZ</TemplateName>
+        <CertificateTemplate>FabrikamOCSPDMZ</CertificateTemplate>
+        <SignatureHashAlgorithm>SHA1</SignatureHashAlgorithm>
         <Cdp>ldap:///CN=Fabrikam%20Issuing%20CA%202,CN=Fabrikam%20Issuing%20CA%202,CN=CDP,CN=Public%20Key%20Services,CN=Services,CN=Configuration,DC=corp,DC=fabrikam,DC=com?certificateRevocationList?base?objectClass=cRLDistributionPoint</Cdp>
         <Cdp>http://pki.fabrikam.com/CertData/Fabrikam%20Issuing%20CA%202.crl</Cdp>
     </RevocationConfig>

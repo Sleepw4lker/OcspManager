@@ -12,24 +12,32 @@ Function Set-CertificateKeyPermissions {
         $Identifier = $(New-Object System.Security.Principal.SecurityIdentifier(
             [System.Security.Principal.WellKnownSidType]::NetworkServiceSid,
             $Null
-            ))
+            )
+        )
     )
 
-    process {
+    begin {
+        New-Variable -Option Constant -Name NCRYPT_SECURITY_DESCR_PROPERTY -Value "Security Descr"
+        New-Variable -Option Constant -Name DACL_SECURITY_INFORMATION -Value 4
+        New-Variable -Option Constant -Name DotNetFX46 -Value 393295
+    }
 
-        # Requires .NET 4.6
-        $DotNetVersion = (Get-ItemProperty `
+    process {
+        
+        # https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
+        $InstalledDotNetFXVersion = (Get-ItemProperty `
                 -Path "HKLM:SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" `
                 -ErrorAction SilentlyContinue
                 ).Release
 
-        If ($DotNetVersion -lt 393295) {
+        If ($InstalledDotNetFXVersion -lt $DotNetFX46) {
             Write-Warning -Message "Cannot set Permissions on Private Key for Certificate $($Certificate.Thumbprint)."
             Write-Warning -Message "Setting ACLs on CNG Keys requires at least .NET Framework 4.6."
             Write-Warning -Message "Set Permissions manually: $($Identifier.Translate([System.Security.Principal.NTAccount]).Value) needs Read Permission on the Private Key."
             return
         }
 
+        # Requires .NET 4.6
         # Works only on CNG Certificates
         # https://stackoverflow.com/questions/51018834/cngkey-assign-permission-to-machine-key
         Try {
@@ -40,9 +48,6 @@ Function Set-CertificateKeyPermissions {
             Write-Warning -Message "Set Permissions manually: $($Identifier.Translate([System.Security.Principal.NTAccount]).Value) needs Read Permission on the Private Key."
             return
         }
-
-        $NCRYPT_SECURITY_DESCR_PROPERTY = "Security Descr"
-        $DACL_SECURITY_INFORMATION = 4
 
         $CngProperty = $PrivateKeyObject.Key.GetProperty(
             $NCRYPT_SECURITY_DESCR_PROPERTY,

@@ -1,4 +1,4 @@
-Function Set-OcspSigningConfiguration {
+Function Invoke-UpdateRevocationConfigs {
 
     [cmdletbinding()]
     param(
@@ -7,6 +7,13 @@ Function Set-OcspSigningConfiguration {
         [String]
         $ComputerName = $env:computername
     )
+
+    begin {
+        # https://docs.microsoft.com/en-us/windows/win32/api/certadm/nf-certadm-iocspcaconfiguration-get_signingflags
+
+        # Manually assign a signing certificate.
+        New-Variable -Option Constant -Name OCSP_SF_MANUAL_ASSIGN_SIGNINGCERT -Value 0x020
+    }
 
     process {
 
@@ -17,7 +24,9 @@ Function Set-OcspSigningConfiguration {
             $True
             )
 
-        $OcspAdmin.OCSPCAConfigurationCollection | ForEach-Object -Process {
+        $OcspAdmin.OCSPCAConfigurationCollection | Where-Object {
+            ($_.SigningFlags -band $OCSP_SF_MANUAL_ASSIGN_SIGNINGCERT) -eq $OCSP_SF_MANUAL_ASSIGN_SIGNINGCERT
+        } | ForEach-Object -Process {
 
             $ThisConfig = $_
 
@@ -34,7 +43,7 @@ Function Set-OcspSigningConfiguration {
             # Get Subject Key Identifier
             $Ski = $CaCertificate.Extensions.SubjectKeyIdentifier
 
-            # Get the newest OCSP Signing Certificates
+            # Get the newest OCSP Signing Certificate
             $NewSigningCertificate = Get-OcspSigningCertificate -Aki $Ski
 
             If (-not $NewSigningCertificate) {
@@ -44,11 +53,10 @@ Function Set-OcspSigningConfiguration {
             }
             Else {
 
-                # Replace Signing Certificate only if there was any Change
-                If (
-                    (-not $ThisConfig.SigningCertificate) -or
-                    ($OldSigningCertificate.Thumbprint.ToUpper() -ne $NewSigningCertificate.Thumbprint.ToUpper())
-                    ) {
+                # Replace Signing Certificate only if there was any Change, 
+                # or if there is currently no Signing Certificate assigned
+                If ((-not $ThisConfig.SigningCertificate) -or
+                    ($OldSigningCertificate.Thumbprint.ToUpper() -ne $NewSigningCertificate.Thumbprint.ToUpper())) {
 
                     # Give Network Service Read Access to the Private Key
                     Set-CertificateKeyPermissions -Certificate $NewSigningCertificate

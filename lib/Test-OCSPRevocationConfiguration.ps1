@@ -20,17 +20,15 @@ Function Test-OCSPRevocationConfiguration {
 
     process {
 
-        $OcspAdmin = New-Object -ComObject "CertAdm.OCSPAdmin"
-
-        $OcspAdmin.GetConfiguration(
-            $ComputerName,
-            $True
-        )
-
-
-        $OcspAdmin.OCSPCAConfigurationCollection | ForEach-Object -Process {
+        Get-OcspRevocationConfiguration -ComputerName $ComputerName | ForEach-Object -Process {
 
             $ThisConfig = $_
+
+            If ($Null -ne $Name) {
+                If ($ThisConfig.Identifier -eq $Name) {
+                    return $True
+                }
+            }
 
             # We load the CA Certificate into an X509Certificate2 Object so that we can call Certificate Properties
             $ThisCaCertificate = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2

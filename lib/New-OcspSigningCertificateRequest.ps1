@@ -30,28 +30,24 @@ Function New-OcspSigningCertificateRequest {
 
     )
 
-    process {
+    begin {
 
-        New-Variable -Name MachineContext -Value 0x2 -Option Constant
+        New-Variable -Option Constant -Name MachineContext -Value 0x2
 
         # https://docs.microsoft.com/en-us/windows/desktop/api/certenroll/ne-certenroll-x500nameflags
         # https://docs.microsoft.com/en-us/dotnet/api/microsoft.hpc.scheduler.store.x500nameflags?view=hpc-sdk-5.1.6115
-        New-Variable -Name XCN_CERT_NAME_STR_NONE -Value 0 -Option Constant
-        New-Variable -Name XCN_CERT_NAME_STR_DISABLE_UTF8_DIR_STR_FLAG -Value 0x100000 -Option Constant
+        New-Variable -Option Constant -Name XCN_CERT_NAME_STR_NONE -Value 0
+        New-Variable -Option Constant -Name XCN_CERT_NAME_STR_DISABLE_UTF8_DIR_STR_FLAG -Value 0x100000
 
         # https://blog.css-security.com/blog/creating-a-self-signed-ssl-certificate-using-powershell
-        New-Variable -Name XCN_CERT_ALT_NAME_DNS_NAME -Value 3 -Option Constant
-
-        # https://msdn.microsoft.com/en-us/library/windows/desktop/aa379367(v=vs.85).aspx
-        New-Variable -Name XCN_OID_CRL_DIST_POINTS -Value '2.5.29.31' -Option Constant
-        New-Variable -Name XCN_OID_AUTHORITY_INFO_ACCESS -Value '1.3.6.1.5.5.7.1.1' -Option Constant
+        New-Variable -Option Constant -Name XCN_CERT_ALT_NAME_DNS_NAME -Value 3
 
         # https://msdn.microsoft.com/en-us/library/windows/desktop/aa374936(v=vs.85).aspx
-        New-Variable -Name XCN_CRYPT_STRING_BASE64 -Value 0x1 -Option Constant
+        New-Variable -Option Constant -Name XCN_CRYPT_STRING_BASE64 -Value 0x1
 
-        # Here's how you move the Certificate to a Smart Card later on: 
-        # https://blogs.technet.microsoft.com/pki/2007/11/13/manually-importing-keys-into-a-smart-card/
-        # certutil –csp "Microsoft Base Smart Card Crypto Provider" –importpfx "<Filename>.pfx"
+    }
+
+    process {
 
         # Creating a new Private Key
         $TargetCertificatePrivateKey = New-Object -ComObject 'X509Enrollment.CX509PrivateKey'
@@ -80,11 +76,10 @@ Function New-OcspSigningCertificateRequest {
 
         $TargetCertificate.InitializeFromPrivateKey($MachineContext, $TargetCertificatePrivateKey, "")
 
-        # encode Subject and Issuer in PrintableString
+        # Encode Subject in PrintableString
         $SubjectEncodingFlag = $XCN_CERT_NAME_STR_DISABLE_UTF8_DIR_STR_FLAG
 
         # Set Certificate Subject Name
-
         $SubjectDistinguishedName = New-Object -ComObject 'X509Enrollment.CX500DistinguishedName'
 
         # https://msdn.microsoft.com/en-us/library/windows/desktop/aa379394(v=vs.85).aspx
@@ -152,6 +147,7 @@ Function New-OcspSigningCertificateRequest {
         $EnrollmentObject.InitializeFromRequest($TargetCertificate)
         $TargetCertificateCsr = $EnrollmentObject.CreateRequest(0)
 
+        # Return the CSR
         $TargetCertificateCsr
 
     }

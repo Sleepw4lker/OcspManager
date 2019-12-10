@@ -1,4 +1,4 @@
-Function New-OcspSigningCertificateRequests {
+Function Invoke-CreateRequests {
 
     [cmdletbinding()]
     param(
@@ -10,14 +10,7 @@ Function New-OcspSigningCertificateRequests {
 
     process {
     
-        $OcspAdmin = New-Object -ComObject "CertAdm.OCSPAdmin"
-
-        $OcspAdmin.GetConfiguration(
-            $ComputerName,
-            $True
-            )
-
-        $OcspAdmin.OCSPCAConfigurationCollection | ForEach-Object -Process {
+        Get-OcspRevocationConfiguration -Offline | ForEach-Object -Process {
 
             $ThisConfig = $_
 

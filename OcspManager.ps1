@@ -111,136 +111,28 @@ $Script:Config = Get-XmlConfig `
     -SchemaPath "$($Script:BaseDirectory)\Config.xsd"
 
 If ($CreateRevocationConfigs.IsPresent) {
-
-    $Script:Config.Config.RevocationConfig | ForEach-Object -Process {
-
-        $CaCertFileName = "$($Script:Config.Config.CaCerPath)\$($_.CaCertFile)"
-
-        If (-not (Test-Path -Path $CaCertFileName)) {
-
-            Write-Warning -Message "Could not find $CaCertFileName. Skipping."
-
-        }
-        Else {
-
-            # Load the Certificate from File
-            $CaCertificate = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
-            $CaCertificate.Import($CaCertFileName)
-
-            # Get Subject Key Identifier
-            $Ski = $CaCertificate.Extensions.SubjectKeyIdentifier
-
-            # Extract CA Common Name
-            $CaName = $CaCertificate.GetNameInfo(0, $False)
-
-            # Create the Revocation Configuration if not already present, and return its Identifier to show we did anything
-            New-OCSPRevocationConfiguration `
-                -Name "$CaName (AKI: $Ski)" `
-                -CaCertificate $CaCertificate `
-                -Cdp $_.Cdp | Select-Object -Property Identifier
-
-        }
-
-    }
-
+    Invoke-CreateRevocationConfigs
 }
 
 If ($CreateRequests.IsPresent) {
-
-    New-OcspSigningCertificateRequests
-
+    Invoke-CreateRequests
 }
 
 If ($InstallCerts.IsPresent) {
-
-    Get-ChildItem $Script:Config.Config.CerPath | Where-Object { $_.Extension -in ".cer",".crt",".pem",".der" } | ForEach-Object -Process {
-
-        $File = $_
-
-        Try {
-            # Load the Certificate File, get the Thumbprint to check if it is already present
-            $Certificate = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
-            $Certificate.Import($File.FullName)
-        }
-        Catch {
-            Write-Warning -Message "File $($File.Name) is not a Certificate."
-
-            # Exit the Loop, continue with next Element
-            # This will cause the Code below to not be executed, thus the Certificate File will not be deleted
-            continue
-        }
-
-        If (Test-Path -Path Cert:\LocalMachine\My\$($Certificate.Thumbprint)) {
-
-            Write-Warning -Message "Certificate $($File.Name) ($($Certificate.Thumbprint)) is already installed, skipping."
-
-        }
-        Else {
-
-            # Would like to migrate this to native Code, but it works for now
-            Try {
-                certreq -accept $File.FullName
-            }
-            Catch {
-                Write-Warning -Message "Could not install Certificate File $($File.Name)"
-
-                # Exit the Loop, continue with next Element
-                # This will cause the Code below to not be executed, thus the Certificate File will not be deleted
-                continue
-            }
-
-        }
-
-        Remove-Item -Path $File.FullName
-    }
-
+    Invoke-InstallCerts
 }
 
 If ($UpdateRevocationConfigs.IsPresent) {
-
-    Set-OcspSigningConfiguration
-
+    Invoke-UpdateRevocationConfigs
 }
 
 If ($ArchiveCerts.IsPresent) {
-
-    $RevocationConfig = Get-OcspRevocationConfiguration
-
-    Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object {
-        $_.EnhancedKeyUsageList -match "1.3.6.1.5.5.7.3.9"
-    } | ForEach-Object -Process {
-
-        $ThisCertificate = $_
-        $IsInUse = $False
-
-        $RevocationConfig | ForEach-Object {
-
-            $ThisConfig = $_
-
-            # We load the CA Certificate into an X509Certificate2 Object so that we can call Certificate Properties
-            $SigningCertificate = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
-            $SigningCertificate.Import($ThisConfig.SigningCertificate)
-
-            If ($SigningCertificate.Thumbprint -match $ThisCertificate.Thumbprint) {
-                $IsInUse = $True
-                Write-Output "Certificate $($ThisCertificate.Thumbprint) is in use by Config $($ThisConfig.Identifier) and will be kept."
-            }
-
-        }
-
-        If ($False -eq $IsInUse) {
-            $_.Archived = $True
-            Write-Output "Certificate $($ThisCertificate.Thumbprint) is not in use and will be archived."
-        }
-
-    }
-
+    Invoke-ArchiveCerts
 }
 
 If ($ShowConfig.IsPresent) {
 
     $Script:Config.Config | Format-List
-
     return
 
 }

@@ -53,17 +53,39 @@ Function New-OCSPRevocationConfiguration {
     )
 
     begin {
+        
         # https://docs.microsoft.com/en-us/windows/win32/api/certadm/nf-certadm-iocspcaconfiguration-get_signingflags
-        $OCSP_SF_SILENT 	                        = 0x001 # Acquire a private key silently.
-        #$OCSP_SF_USE_CACERT 	                    = 0x002 # Use a CA certificate in this configuration for signing an OCSP response. This option is available only if the responder service is installed on the CA computer.
-        $OCSP_SF_ALLOW_SIGNINGCERT_AUTORENEWAL 	    = 0x004 # Enable a responder service to automatically transition to a renewed signing certificate.
-        #$OCSP_SF_FORCE_SIGNINGCERT_ISSUER_ISCA     = 0x008 # Force a delegated signing certificate to be signed by the CA.
-        $OCSP_SF_AUTODISCOVER_SIGNINGCERT 	        = 0x010 # Automatically discover a delegated signing certificate.
-        $OCSP_SF_MANUAL_ASSIGN_SIGNINGCERT 	        = 0x020 # Manually assign a signing certificate.
-        $OCSP_SF_RESPONDER_ID_KEYHASH 	            = 0x040 # A responder ID includes a hash of the public key of the signing certificate (default).
-        $OCSP_SF_RESPONDER_ID_NAME 	                = 0x080 # A responder ID includes the name of the subject in a signing certificate.
-        $OCSP_SF_ALLOW_NONCE_EXTENSION              = 0x100 # Enable NONCE extension to be processed by a responder service.
-        $OCSP_SF_ALLOW_SIGNINGCERT_AUTOENROLLMENT   = 0x200 # A responder service can enroll for a signing certificate.
+
+        # Acquire a private key silently.
+        New-Variable -Option Constant -Name OCSP_SF_SILENT -Value 0x001 
+
+        # Use a CA certificate in this configuration for signing an OCSP response. 
+        # This option is available only if the responder service is installed on the CA computer.
+        #New-Variable -Option Constant -Name OCSP_SF_USE_CACERT -Value 0x002
+
+        # Enable a responder service to automatically transition to a renewed signing certificate.
+        New-Variable -Option Constant -Name OCSP_SF_ALLOW_SIGNINGCERT_AUTORENEWAL -Value 0x004
+
+        # Force a delegated signing certificate to be signed by the CA.
+        #New-Variable -Option Constant -Name OCSP_SF_FORCE_SIGNINGCERT_ISSUER_ISCA -Value 0x008
+
+        # Automatically discover a delegated signing certificate.
+        New-Variable -Option Constant -Name OCSP_SF_AUTODISCOVER_SIGNINGCERT -Value 0x010
+
+        # Manually assign a signing certificate.
+        New-Variable -Option Constant -Name OCSP_SF_MANUAL_ASSIGN_SIGNINGCERT -Value 0x020
+
+        # A responder ID includes a hash of the public key of the signing certificate (default).
+        New-Variable -Option Constant -Name OCSP_SF_RESPONDER_ID_KEYHASH -Value 0x040
+
+        # A responder ID includes the name of the subject in a signing certificate.
+        New-Variable -Option Constant -Name OCSP_SF_RESPONDER_ID_NAME -Value 0x080 
+
+        # Enable NONCE extension to be processed by a responder service.
+        New-Variable -Option Constant -Name OCSP_SF_ALLOW_NONCE_EXTENSION -Value 0x100
+
+        # A responder service can enroll for a signing certificate.
+        New-Variable -Option Constant -Name OCSP_SF_ALLOW_SIGNINGCERT_AUTOENROLLMENT -Value 0x200
 
     }
 
@@ -73,7 +95,11 @@ Function New-OCSPRevocationConfiguration {
         # https://www.sysadmins.lv/blog-en/managing-online-responders-ocsp-with-powershell-part-3.aspx
         # https://social.technet.microsoft.com/wiki/contents/articles/12167.ocsp-powershell-script.aspx
 
-        If (Test-OCSPRevocationConfiguration -CaCertificate $CaCertificate -ComputerName $ComputerName) {
+        If (Test-OCSPRevocationConfiguration `
+            -Name $Name `
+            -CaCertificate $CaCertificate `
+            -ComputerName $ComputerName
+        ) {
 
             # Get Subject Key Identifier
             $Ski = $CaCertificate.Extensions.SubjectKeyIdentifier
@@ -104,7 +130,7 @@ Function New-OCSPRevocationConfiguration {
         # Initialize empty Signing Flags, populate them with the below Code
         $SigningFlags = 0x0
 
-        If ($ConfigString.IsPresent -and $CertificateTemplate.IsPresent) {
+        If ($ConfigString -and $CertificateTemplate) {
 
             $NewConfig.CAConfig = $ConfigString
             $NewConfig.SigningCertificateTemplate = $CertificateTemplate.Trim()
