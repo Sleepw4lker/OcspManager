@@ -5,7 +5,7 @@ Function Invoke-InstallCerts {
 
     process {
 
-        Get-ChildItem $Script:Config.Config.CerPath | Where-Object { $_.Extension -in ".cer",".crt",".pem",".der" } | ForEach-Object -Process {
+        Get-ChildItem -Path $Script:Config.Config.CerPath | Where-Object { $_.Extension -in ".cer",".crt",".pem",".der" } | ForEach-Object -Process {
 
             $File = $_
     
@@ -15,7 +15,7 @@ Function Invoke-InstallCerts {
                 $Certificate.Import($File.FullName)
             }
             Catch {
-                Write-Warning -Message "File $($File.Name) is not a Certificate."
+                Write-Warning -Message "File $($File.Name) is not a valid Certificate."
     
                 # Exit the Loop, continue with next Element
                 # This will cause the Code below to not be executed, thus the Certificate File will not be deleted
@@ -41,7 +41,7 @@ Function Invoke-InstallCerts {
                     Remove-Item -Path $File.FullName
                 }
                 Else {
-                    Write-Warning -Message "Could not install Certificate File $($File.Name)"
+                    Write-Warning -Message "Could not install Certificate File $($File.Name)."
                 }
 
             }

@@ -29,20 +29,20 @@
 
     .PARAMETER Deploy
     Can be used for a quick OCSP Deployment. Installs and configures the Role, then creates Revocation Configs and Requests, if any.
-    Assigns existing Signing Certificates and creates Signing Requests afterwards.
+    Assigns existing Signing Certificates and creates Certificate Signing Requests afterwards.
 
     .PARAMETER Decommission
-    Can be used to quickly uninstall the OCSP Responder. Deletes all Revocation Configs and uninstall the Role.
+    Can be used to quickly uninstall the OCSP Responder. Deletes all Revocation Configs and uninstalls the Online Responder Role.
 
     .PARAMETER DeleteRevocationConfigs
     Removes all currently defined Revocation Configurations.
 
     .PARAMETER ReloadRevocationConfigs
     Marks all configured Revocation Configurations as Dirty, causing them to be reloaded.
-    Less invasive than an "iisreset" e.g. to trigger Enrollment for Signing Certificates.
+    Less invasive than an "iisreset" e.g. to trigger Auto-Enrollment for Signing Certificates.
 
     .PARAMETER ShowConfig
-    Prints the current Configuration that is defined in the Config.XML. A Helper to ensure the file is configured as desired.
+    Prints the current Configuration that is defined in the Config.XML. A Helper to ensure the file is configured as desired, and validates against the XML Schema.
 
    .Notes
     AUTHOR: Uwe Gradenegger, MSFT
@@ -148,19 +148,28 @@ If ($ShowConfig.IsPresent) {
     return
 }
 
+# Ensuring the Script will be run on a supported Operating System
+$OS = Get-WmiObject Win32_OperatingSystem
+If (($OS.name -notmatch "Server") -or ([int32]$OS.BuildNumber -lt 9200)) {
+    Write-Warning -Message "This Script must be run on Windows Server 2012 or newer!"
+    return 
+}
+
 # Check if the Script is ran with Elevation
 If (-not (
     [Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()
     ).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-    Write-Warning -Message "Script must be run with Elevation (Run as Administrator)! Aborting." 
+    Write-Warning -Message "This Script must be run with Elevation (Run as Administrator)! Aborting." 
     return
 }
 
-# Check if we have an OCSP Responder installed on the machine
-Try {
-    [void](New-Object -ComObject "CertAdm.OCSPAdmin")
+# This is obviously the only Command that does not require the Online Responder to be installed
+If ($Deploy.IsPresent) {
+    Invoke-Deploy
 }
-Catch {
+
+# Check if we have an OCSP Responder installed on the machine
+If (-not (Get-WindowsFeature -Name ADCS-Online-Cert).Installed) {
     Write-Warning -Message "This Script requires the Microsoft Online Responder to be installed on the machine! Aborting."
     return
 }
@@ -183,10 +192,6 @@ If ($UpdateRevocationConfigs.IsPresent) {
 
 If ($ArchiveCerts.IsPresent) {
     Invoke-ArchiveCerts
-}
-
-If ($Deploy.IsPresent) {
-    Invoke-Deploy
 }
 
 If ($Decommission.IsPresent) {
