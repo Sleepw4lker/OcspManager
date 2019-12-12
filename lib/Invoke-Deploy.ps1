@@ -25,10 +25,24 @@ Function Invoke-Deploy {
         }
 
         # SafeNet HSM require the OCSP Responder to run as the Local SYSTEM Account instead of the NETWORK SERVICE Account
-        If (Test-KspPresence -Ksp "SafeNet Key Storage Provider") { 
+        # https://safenet.gemalto.com/resources/integration-guide/data-protection/Encryption/Microsoft-OCSP-SafeNetLunaHSM-IntegrationGuide-RevR/
+        If ($Script:Config.Config.RevocationConfig | Where-Object {
+            $_.KspName.ToUpper() -eq $("SafeNet Key Storage Provider").ToUpper()
+        }) {
+
+            Write-Verbose -Message "Applying Workaround for SafeNet Key Storage Provider"
+
             Get-CimInstance -ClassName Win32_Service -Filter "name='OcspSvc'" |
                 Invoke-CimMethod -Name Change -Arguments @{StartName="LocalSystem"}
+
+            # Configuring the Service to allow Interaction with the Desktop
+            $OcspSvcRegKey = Get-Item -Path HKLM:\SYSTEM\CurrentControlSet\Services\OcspSvc
+            Set-ItemProperty $OcspSvcRegKey.PSPath `
+                -Name Type `
+                -Value ($OcspSvcRegKey.GetValue('Type') -bor 0x100)
+
             Restart-Service OcspSvc
+
         }
 
         Write-Output "Enabling Firewall Rules..."

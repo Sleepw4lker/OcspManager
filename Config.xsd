@@ -1,32 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 
-    <xsd:element name="Config" type="ConfigType"/>
+    <xsd:element name="Config" type="ConfigType"/>    
 
     <xsd:complexType name="ConfigType">
         <xsd:sequence>
             <xsd:element name="CsrPath" type="xsd:string" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="CerPath" type="xsd:string" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="CaCerPath" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-            <xsd:element name="KeyLength" minOccurs="1" maxOccurs="1">
-                <xsd:simpleType>
-                    <xsd:restriction base="xsd:integer">
-                        <xsd:enumeration value="8192"/>
-                        <xsd:enumeration value="4096"/>
-                        <xsd:enumeration value="2048"/>
-                    </xsd:restriction>
-                </xsd:simpleType>
-            </xsd:element>
-            <xsd:element name="KspName" minOccurs="1" maxOccurs="1">
-                <xsd:simpleType>
-                    <xsd:restriction base="xsd:string">
-                        <xsd:pattern value="[Mm][Ii][Cc][Rr][Oo][Ss][Oo][Ff][Tt] [Ss][Oo][Ff][Tt][Ww][Aa][Rr][Ee] [Kk][Ee][Yy] [Ss][Tt][Oo][Rr][Aa][Gg][Ee] [Pp][Rr][Oo][Vv][Ii][Dd][Ee][Rr]"/>
-                        <xsd:pattern value="[Uu][Tt][Ii][Mm][Aa][Cc][Oo] [Cc][Rr][Yy][Pp][Tt][Oo][Ss][Ee][Rr][Vv][Ee][Rr] [Kk][Ee][Yy] [Ss][Tt][Oo][Rr][Aa][Gg][Ee] [Pp][Rr][Oo][Vv][Ii][Dd][Ee][Rr]"/>
-                        <xsd:pattern value="[Ss][Aa][Ff][Ee][Nn][Ee][Tt] [Kk][Ee][Yy] [Ss][Tt][Oo][Rr][Aa][Gg][Ee] [Pp][Rr][Oo][Vv][Ii][Dd][Ee][Rr]"/>
-                        <xsd:pattern value="[Nn][Cc][Ii][Pp][Hh][Ee][Rr] [Ss][Ee][Cc][Uu][Rr][Ii][Tt][Yy] [Ww][Oo][Rr][Ll][Dd] [Kk][Ee][Yy] [Ss][Tt][Oo][Rr][Aa][Gg][Ee] [Pp][Rr][Oo][Vv][Ii][Dd][Ee][Rr]"/>
-                    </xsd:restriction>
-                </xsd:simpleType>
-            </xsd:element>
             <xsd:element name="RevocationConfig" type="RevocationConfigType" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
     </xsd:complexType>
@@ -44,7 +25,26 @@
             </xsd:element>
     		<xsd:element name="CaCertFile" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     		<xsd:element name="ConfigString" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-    		<xsd:element name="CertificateTemplate" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="CertificateTemplate" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="KspName" minOccurs="0" maxOccurs="1">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:pattern value="[Mm][Ii][Cc][Rr][Oo][Ss][Oo][Ff][Tt] [Ss][Oo][Ff][Tt][Ww][Aa][Rr][Ee] [Kk][Ee][Yy] [Ss][Tt][Oo][Rr][Aa][Gg][Ee] [Pp][Rr][Oo][Vv][Ii][Dd][Ee][Rr]"/>
+                        <xsd:pattern value="[Uu][Tt][Ii][Mm][Aa][Cc][Oo] [Cc][Rr][Yy][Pp][Tt][Oo][Ss][Ee][Rr][Vv][Ee][Rr] [Kk][Ee][Yy] [Ss][Tt][Oo][Rr][Aa][Gg][Ee] [Pp][Rr][Oo][Vv][Ii][Dd][Ee][Rr]"/>
+                        <xsd:pattern value="[Ss][Aa][Ff][Ee][Nn][Ee][Tt] [Kk][Ee][Yy] [Ss][Tt][Oo][Rr][Aa][Gg][Ee] [Pp][Rr][Oo][Vv][Ii][Dd][Ee][Rr]"/>
+                        <xsd:pattern value="[Nn][Cc][Ii][Pp][Hh][Ee][Rr] [Ss][Ee][Cc][Uu][Rr][Ii][Tt][Yy] [Ww][Oo][Rr][Ll][Dd] [Kk][Ee][Yy] [Ss][Tt][Oo][Rr][Aa][Gg][Ee] [Pp][Rr][Oo][Vv][Ii][Dd][Ee][Rr]"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="KeyLength" minOccurs="0" maxOccurs="1">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:integer">
+                        <xsd:enumeration value="4096"/>
+                        <xsd:enumeration value="3072"/>
+                        <xsd:enumeration value="2048"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
             <xsd:element name="SignatureHashAlgorithm" minOccurs="1" maxOccurs="1">
                 <xsd:simpleType>
                     <xsd:restriction base="xsd:string">

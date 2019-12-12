@@ -119,6 +119,24 @@ If ($PSBoundParameters.Count -eq 0) {
     return
 }
 
+$Script:BaseDirectory = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
+
+# Loading all Libary Scripts we depend on
+Get-ChildItem -Path "$Script:BaseDirectory\lib" -Filter *.ps1 | ForEach-Object {
+    . ($_.FullName)
+}
+
+# Import the Config.xml and validate it against a Schema File
+$Script:Config = Get-XmlConfig `
+    -Path "$($Script:BaseDirectory)\Config.xml" `
+    -SchemaPath "$($Script:BaseDirectory)\Config.xsd"
+
+If ($ShowConfig.IsPresent) {
+    $Script:Config.Config | Format-List
+    $Script:Config.Config.RevocationConfig | Format-List
+    return
+}
+
 # Check if the Script is ran with Elevation
 If (-not (
     [Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -135,18 +153,6 @@ Catch {
     Write-Warning -Message "This Script requires the Microsoft Online Responder to be installed on the machine! Aborting."
     return
 }
-
-$Script:BaseDirectory = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
-
-# Loading all Libary Scripts we depend on
-Get-ChildItem -Path "$Script:BaseDirectory\lib" -Filter *.ps1 | ForEach-Object {
-    . ($_.FullName)
-}
-
-# Import the Config.xml and validate it against a Schema File
-$Script:Config = Get-XmlConfig `
-    -Path "$($Script:BaseDirectory)\Config.xml" `
-    -SchemaPath "$($Script:BaseDirectory)\Config.xsd"
 
 If ($CreateRevocationConfigs.IsPresent) {
     Invoke-CreateRevocationConfigs
@@ -178,10 +184,4 @@ If ($DeleteRevocationConfigs.IsPresent) {
 
 If ($ReloadRevocationConfigs.IsPresent) {
     Invoke-ReloadRevocationConfigs
-}
-
-If ($ShowConfig.IsPresent) {
-    $Script:Config.Config | Format-List
-    $Script:Config.Config.RevocationConfig | Format-List
-    return
 }

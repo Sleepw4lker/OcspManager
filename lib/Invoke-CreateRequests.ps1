@@ -31,12 +31,28 @@ Function Invoke-CreateRequests {
 
             $CsrFileName = "$($Script:Config.Config.CsrPath)\$($CAName.Replace(" ","_"))-$($Ski).csr"
 
+            $Arguments = @{
+                CommonName = $ComputerName
+                Aki = $Ski
+            }
+
+            # Try to grab some Meta Information from the Config.xml
+            $MetaInformation = $Script:Config.Config.RevocationConfig | Where-Object {
+                $_.Name -eq $ThisConfig.Identifier
+            }
+
+            If ($MetaInformation.KspName) {
+                Write-Verbose -Message "Key Storage Provider is $($MetaInformation.KspName)"
+                $Arguments.Add("Ksp", $MetaInformation.KspName)
+            }
+
+            If ($MetaInformation.KeyLength) {
+                Write-Verbose -Message "Key Length is $($MetaInformation.KeyLength) Bits"
+                $Arguments.Add("KeyLength", $MetaInformation.KeyLength)
+            }
+
             # Create Certificate Request specifying the SKI and write it to a CSR file
-            New-OcspSigningCertificateRequest `
-                -CommonName $ComputerName `
-                -Ksp $Script:Config.Config.KspName `
-                -Aki $Ski `
-                -KeyLength $Script:Config.Config.KeyLength | Out-File -Filepath $CsrFileName -Encoding utf8
+            New-OcspSigningCertificateRequest @Arguments | Out-File -Filepath $CsrFileName -Encoding utf8
 
             Get-ChildItem -Path $CsrFileName
 

@@ -39,7 +39,7 @@ Function Invoke-ArchiveCerts {
 
             }
 
-            # We should get here only if the Thumbprint was not found in any of the Revocation Configs
+            # We shold get here only if the Thumbprint was not found in any of the Revocation Configs
             Write-Output "Certificate $($ThisCertificate.Thumbprint) is not in use and will be archived."
             $ThisCertificate.Archived = $True
 
