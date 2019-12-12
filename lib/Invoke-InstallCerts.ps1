@@ -30,7 +30,14 @@ Function Invoke-InstallCerts {
             Else {
 
                 If ($True -eq (Install-IssuedCertificate -Certificate $Certificate)) {
+                    
                     Write-Output "Certificate $($File.Name) ($($Certificate.Thumbprint)) was successfully installed."
+
+                    # Give Network Service Read Access to the Private Key - if the service is not running as SYSTEM
+                    If ((Get-CimInstance -ClassName Win32_Service -Filter "name='OcspSvc'").StartName -ne "LocalSystem") {
+                        Set-CertificateKeyPermissions -Certificate (Get-ChildItem Cert:\LocalMachine\My\$($Certificate.Thumbprint))
+                    }
+                    
                     Remove-Item -Path $File.FullName
                 }
                 Else {

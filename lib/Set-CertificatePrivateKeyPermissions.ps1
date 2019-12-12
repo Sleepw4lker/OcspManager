@@ -71,6 +71,7 @@ Function Set-CertificateKeyPermissions {
             ([System.Security.Cryptography.CngPropertyOptions]::Persist -bor $DACL_SECURITY_INFORMATION)
             )
 
+        Write-Verbose "Granting Read Permissions on Private Key of Certificate $($Certificate.Thumbprint) to $($Identifier.Translate([System.Security.Principal.NTAccount]).Value)"
         Try {
             $PrivateKeyObject.Key.SetProperty($CngProperty2)
         }

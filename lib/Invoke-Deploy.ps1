@@ -9,6 +9,11 @@ Function Invoke-Deploy {
 
     process {
 
+        If ((Get-WindowsFeature -Name ADCS-Online-Cert).InstallState -eq "UninstallPending") {
+            Write-Warning "Uninstallation of the Online Responder Role was not yet finished. Aborting."
+            return
+        }
+
         Write-Output "Installing Server Roles..."
 
         Install-WindowsFeature `

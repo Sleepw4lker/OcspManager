@@ -58,9 +58,6 @@ Function Invoke-UpdateRevocationConfigs {
                 If ((-not $ThisConfig.SigningCertificate) -or
                     ($OldSigningCertificate.Thumbprint.ToUpper() -ne $NewSigningCertificate.Thumbprint.ToUpper())) {
 
-                    # Give Network Service Read Access to the Private Key
-                    Set-CertificateKeyPermissions -Certificate $NewSigningCertificate
-
                     # Assign the Signing Certificate to the Revocation Configuration
                     Write-Output "Assigning Certificate $($NewSigningCertificate.Thumbprint) (expiring on $($NewSigningCertificate.NotAfter)) to Revocation Configuration $($ThisConfig.Identifier)"
                     $ThisConfig.SigningCertificate = $NewSigningCertificate.RawData
