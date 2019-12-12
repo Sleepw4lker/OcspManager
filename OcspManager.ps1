@@ -33,8 +33,12 @@
     .PARAMETER DeleteRevocationConfigs
     Removes all currently defined Revocation Configurations.
 
+    .PARAMETER ReloadRevocationConfigs
+    Marks all configured Revocation Configurations as Dirty, causing them to be reloaded.
+    Less invasive than an "iisreset" e.g. to trigger Enrollment for Signing Certificates.
+
     .PARAMETER ShowConfig
-    Prints the current Configuration. A Helper to ensure the Config.xml File is as desired.
+    Prints the current Configuration that is defined in the Config.XML. A Helper to ensure the file is configured as desired.
 
    .Notes
     AUTHOR: Uwe Gradenegger, MSFT
@@ -93,6 +97,13 @@ param(
     )]
     [Switch]
     $DeleteRevocationConfigs = $False,
+
+    [Parameter(
+        ParameterSetName="ReloadRevocationConfigs",
+        Mandatory=$True
+    )]
+    [Switch]
+    $ReloadRevocationConfigs = $False,
 
     [Parameter(
         ParameterSetName="ShowConfig",
@@ -165,7 +176,12 @@ If ($DeleteRevocationConfigs.IsPresent) {
     Invoke-DeleteRevocationConfigs
 }
 
+If ($ReloadRevocationConfigs.IsPresent) {
+    Invoke-ReloadRevocationConfigs
+}
+
 If ($ShowConfig.IsPresent) {
     $Script:Config.Config | Format-List
+    $Script:Config.Config.RevocationConfig | Format-List
     return
 }
