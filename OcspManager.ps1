@@ -29,6 +29,10 @@
 
     .PARAMETER Deploy
     Can be used for a quick OCSP Deployment. Installs and configures the Role, then creates Revocation Configs and Requests, if any.
+    Assigns existing Signing Certificates and creates Signing Requests afterwards.
+
+    .PARAMETER Decommission
+    Can be used to quickly uninstall the OCSP Responder. Deletes all Revocation Configs and uninstall the Role.
 
     .PARAMETER DeleteRevocationConfigs
     Removes all currently defined Revocation Configurations.
@@ -90,6 +94,13 @@ param(
     )]
     [Switch]
     $Deploy = $False,
+
+    [Parameter(
+        ParameterSetName="Decommission",
+        Mandatory=$True
+    )]
+    [Switch]
+    $Decommission = $False,
 
     [Parameter(
         ParameterSetName="DeleteRevocationConfigs",
@@ -176,6 +187,10 @@ If ($ArchiveCerts.IsPresent) {
 
 If ($Deploy.IsPresent) {
     Invoke-Deploy
+}
+
+If ($Decommission.IsPresent) {
+    Invoke-Decommission
 }
 
 If ($DeleteRevocationConfigs.IsPresent) {

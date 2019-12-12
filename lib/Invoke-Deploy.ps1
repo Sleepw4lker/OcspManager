@@ -3,6 +3,10 @@ Function Invoke-Deploy {
     [cmdletbinding()]
     param()
 
+    begin {
+        New-Variable -Option Constant -Name ALLOW_INTERACT_WITH_DESKTOP -Value 0x100
+    }
+
     process {
 
         Write-Output "Installing Server Roles..."
@@ -37,9 +41,12 @@ Function Invoke-Deploy {
 
             # Configuring the Service to allow Interaction with the Desktop
             $OcspSvcRegKey = Get-Item -Path HKLM:\SYSTEM\CurrentControlSet\Services\OcspSvc
-            Set-ItemProperty $OcspSvcRegKey.PSPath `
-                -Name Type `
-                -Value ($OcspSvcRegKey.GetValue('Type') -bor 0x100)
+
+            If (-not ($OcspSvcRegKey.GetValue('Type') -bor $ALLOW_INTERACT_WITH_DESKTOP) -eq $ALLOW_INTERACT_WITH_DESKTOP) {
+                Set-ItemProperty $OcspSvcRegKey.PSPath `
+                    -Name Type `
+                    -Value ($OcspSvcRegKey.GetValue('Type') -bor $ALLOW_INTERACT_WITH_DESKTOP)
+            }
 
             Restart-Service OcspSvc
 
@@ -62,6 +69,7 @@ Function Invoke-Deploy {
 
         Invoke-DeleteRevocationConfigs
         Invoke-CreateRevocationConfigs
+        Invoke-UpdateRevocationConfigs
 
         Write-Output "Creating Certificate Requests..."
 
