@@ -14,7 +14,7 @@ Function New-OCSPRevocationConfiguration {
 
         [Parameter(Mandatory=$True)]
         [ValidateNotNullorEmpty()]
-        [System.Security.Cryptography.X509Certificates.X509Certificate]
+        [System.Security.Cryptography.X509Certificates.X509Certificate2]
         $CaCertificate,
 
         [Parameter(Mandatory=$True)]

@@ -4,7 +4,7 @@ Function Set-CertificateKeyPermissions {
     param(
         [Parameter(Mandatory=$True)]
         [ValidateScript({$_.hasPrivateKey})]
-        [System.Security.Cryptography.X509Certificates.X509Certificate]
+        [System.Security.Cryptography.X509Certificates.X509Certificate2]
         $Certificate,
 
         [Parameter(Mandatory=$False)]

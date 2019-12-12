@@ -19,8 +19,7 @@ Function New-OcspSigningCertificateRequest {
         $Aki,
 
         [Parameter(Mandatory=$False)]
-        [ValidateNotNullOrEmpty()]
-        #[ValidateScript({$Null -ne (certutil -csplist | find "$($_)")})] # Should be converted to PoSH only, but works for now
+        [ValidateScript({Test-KspPresence -Ksp $_})]
         [String]
         $Ksp = "Microsoft Software Key Storage Provider",
 
@@ -33,7 +32,7 @@ Function New-OcspSigningCertificateRequest {
 
     begin {
 
-        New-Variable -Option Constant -Name MachineContext -Value 0x2
+        New-Variable -Option Constant -Name ContextMachine -Value 0x2
 
         # https://docs.microsoft.com/en-us/windows/desktop/api/certenroll/ne-certenroll-x500nameflags
         # https://docs.microsoft.com/en-us/dotnet/api/microsoft.hpc.scheduler.store.x500nameflags?view=hpc-sdk-5.1.6115
@@ -75,7 +74,11 @@ Function New-OcspSigningCertificateRequest {
         # https://docs.microsoft.com/en-us/windows/desktop/seccertenroll/certificate-request-functions
         $TargetCertificate = New-Object -ComObject 'X509Enrollment.CX509CertificateRequestPkcs10'
 
-        $TargetCertificate.InitializeFromPrivateKey($MachineContext, $TargetCertificatePrivateKey, "")
+        $TargetCertificate.InitializeFromPrivateKey(
+            $ContextMachine,
+            $TargetCertificatePrivateKey,
+            [string]::Empty
+        )
 
         # Encode Subject in PrintableString
         $SubjectEncodingFlag = $XCN_CERT_NAME_STR_DISABLE_UTF8_DIR_STR_FLAG

@@ -28,23 +28,16 @@ Function Invoke-InstallCerts {
     
             }
             Else {
-    
-                # Would like to migrate this to native Code, but it works for now
-                Try {
-                    certreq -accept $File.FullName
-                }
-                Catch {
-                    Write-Warning -Message "Could not install Certificate File $($File.Name)"
-    
-                    # Exit the Loop, continue with next Element
-                    # This will cause the Code below to not be executed, thus the Certificate File will not be deleted
-                    continue
-                }
-    
-            }
-    
-            Remove-Item -Path $File.FullName
-        }
 
+                If ($True -eq (Install-IssuedCertificate -Certificate $Certificate)) {
+                    Write-Output "Certificate $($File.Name) ($($Certificate.Thumbprint)) was successfully installed."
+                    Remove-Item -Path $File.FullName
+                }
+                Else {
+                    Write-Warning -Message "Could not install Certificate File $($File.Name)"
+                }
+
+            }
+        }
     }
 }
