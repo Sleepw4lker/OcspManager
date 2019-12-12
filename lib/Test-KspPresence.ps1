@@ -8,6 +8,10 @@ Function Test-KspPresence {
         $Ksp
     )
 
+    begin {
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
+    }
+
     process {
 
         # https://github.com/pauldotknopf/WindowsSDK7-Samples/blob/master/security/certservices/certenroll/createsimplecertrequest/CreateSimpleCertRequest.cs
@@ -25,5 +29,9 @@ Function Test-KspPresence {
         }
 
         return $True
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 }

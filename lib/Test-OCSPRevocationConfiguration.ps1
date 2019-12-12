@@ -18,6 +18,10 @@ Function Test-OCSPRevocationConfiguration {
         $ComputerName = $env:computername
     )
 
+    begin {
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
+    }
+
     process {
 
         Get-OcspRevocationConfiguration -ComputerName $ComputerName | ForEach-Object -Process {
@@ -42,6 +46,10 @@ Function Test-OCSPRevocationConfiguration {
 
         return $False
 
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 
 }

@@ -149,9 +149,9 @@ If ($ShowConfig.IsPresent) {
 }
 
 # Ensuring the Script will be run on a supported Operating System
-$OS = Get-WmiObject Win32_OperatingSystem
+$OS = Get-WmiObject -Class Win32_OperatingSystem
 If (($OS.name -notmatch "Server") -or ([int32]$OS.BuildNumber -lt 9200)) {
-    Write-Warning -Message "This Script must be run on Windows Server 2012 or newer!"
+    Write-Warning -Message "This Script must be run on Windows Server 2012 or newer! Aborting."
     return 
 }
 
@@ -163,13 +163,20 @@ If (-not (
     return
 }
 
+$Script:LogFile = ("{0}\{1}-Log-{2}.txt" -f $env:Temp, $MyInvocation.MyCommand.Name.Replace(".ps1",""), $(Get-Date -Format "yyyyMMdd-HHmmss"))
+Trap {Continue} Start-Transcript -Path $Script:LogFile 
+
 # This is obviously the only Command that does not require the Online Responder to be installed
 If ($Deploy.IsPresent) {
     Invoke-Deploy
 }
 
 # Check if we have an OCSP Responder installed on the machine
-If (-not (Get-WindowsFeature -Name ADCS-Online-Cert).Installed) {
+If ((Get-ItemProperty `
+        -Path "HKLM:SOFTWARE\Microsoft\ADCS\OCSP" `
+        -ErrorAction SilentlyContinue
+    ).ConfigurationStatus -ne 2) {
+
     Write-Warning -Message "This Script requires the Microsoft Online Responder to be installed on the machine! Aborting."
     return
 }
@@ -205,3 +212,6 @@ If ($DeleteRevocationConfigs.IsPresent) {
 If ($ReloadRevocationConfigs.IsPresent) {
     Invoke-ReloadRevocationConfigs
 }
+
+# Finished!
+Trap {Continue} Stop-Transcript

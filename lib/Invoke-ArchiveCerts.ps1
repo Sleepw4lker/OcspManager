@@ -4,6 +4,7 @@ Function Invoke-ArchiveCerts {
     param()
 
     begin {
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
         New-Variable -Option Constant -Name XCN_OID_PKIX_KP_OCSP_SIGNING -Value "1.3.6.1.5.5.7.3.9"
     }
 
@@ -17,33 +18,41 @@ Function Invoke-ArchiveCerts {
             $SigningCertificate = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
             $SigningCertificate.Import($_.SigningCertificate)
 
+            Write-Verbose -Message "Adding $($SigningCertificate.Thumbprint) to List."
+
             # returning the Thumbprint
             $SigningCertificate.Thumbprint
 
         }
 
-        Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object {
+        $AllCertificates = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object {
             $_.EnhancedKeyUsageList -match $XCN_OID_PKIX_KP_OCSP_SIGNING
-        } | ForEach-Object -Process {
+        }
 
-            $ThisCertificate = $_
+        ForEach ($Certificate in $AllCertificates) {
+            
+            Write-Verbose -Message "Comparing $($Certificate.Thumbprint) against List of configured OCSP Certificates."
 
             # Compare the Revocation Configs Thumbprints with this Certificate
             $Thumbprints | ForEach-Object {
 
                 # Go on to the next Object if the Certificate is in use
-                If ($_ -match $ThisCertificate.Thumbprint) {
-                    Write-Output "Certificate $($ThisCertificate.Thumbprint) is in use and will be kept."
+                If ($_ -match $Certificate.Thumbprint) {
+                    Write-Output "Certificate $($Certificate.Thumbprint) is in use and will be kept."
                     continue
                 }
 
             }
 
-            # We shold get here only if the Thumbprint was not found in any of the Revocation Configs
-            Write-Output "Certificate $($ThisCertificate.Thumbprint) is not in use and will be archived."
-            $ThisCertificate.Archived = $True
+            # We should get here only if the Thumbprint was not found in any of the Revocation Configs
+            Write-Output "Certificate $($Certificate.Thumbprint) is not in use and will be archived."
+            $Certificate.Archived = $True
 
         }
 
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 }

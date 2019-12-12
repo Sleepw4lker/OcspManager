@@ -21,6 +21,8 @@ Function Install-IssuedCertificate {
 
     begin {
 
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
+
         # https://docs.microsoft.com/en-us/windows/win32/api/certenroll/ne-certenroll-x509certificateenrollmentcontext
         New-Variable -Option Constant -Name ContextMachine -Value 0x2
 
@@ -69,5 +71,9 @@ Function Install-IssuedCertificate {
 
         return $True
 
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 }

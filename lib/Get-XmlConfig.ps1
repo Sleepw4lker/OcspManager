@@ -19,6 +19,10 @@ Function Get-XmlConfig {
         $SchemaDirectory
     )
 
+    begin {
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
+    }
+
     process {
 
         Write-Verbose "Loading Configuration File $Path"
@@ -107,6 +111,10 @@ Function Get-XmlConfig {
 
         $Config
 
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 
 }

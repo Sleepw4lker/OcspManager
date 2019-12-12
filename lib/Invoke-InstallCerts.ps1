@@ -3,11 +3,15 @@ Function Invoke-InstallCerts {
     [cmdletbinding()]
     param()
 
+    begin {
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
+    }
+
     process {
 
-        Get-ChildItem -Path $Script:Config.Config.CerPath | Where-Object { $_.Extension -in ".cer",".crt",".pem",".der" } | ForEach-Object -Process {
-
-            $File = $_
+        $Files = Get-ChildItem -Path $Script:Config.Config.CerPath | Where-Object { $_.Extension -in ".cer",".crt",".pem",".der" }
+        
+        ForEach ($File in $Files) {
     
             Try {
                 # Load the Certificate File, get the Thumbprint to check if it is already present
@@ -46,5 +50,9 @@ Function Invoke-InstallCerts {
 
             }
         }
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 }

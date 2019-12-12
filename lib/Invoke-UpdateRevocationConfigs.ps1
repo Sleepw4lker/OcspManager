@@ -9,6 +9,8 @@ Function Invoke-UpdateRevocationConfigs {
     )
 
     begin {
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
+
         # https://docs.microsoft.com/en-us/windows/win32/api/certadm/nf-certadm-iocspcaconfiguration-get_signingflags
 
         # Manually assign a signing certificate.
@@ -77,6 +79,10 @@ Function Invoke-UpdateRevocationConfigs {
             $True
         )
 
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 
 }

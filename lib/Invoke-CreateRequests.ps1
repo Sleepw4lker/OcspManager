@@ -8,6 +8,10 @@ Function Invoke-CreateRequests {
         $ComputerName = $env:computername
     )
 
+    begin {
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
+    }
+
     process {
     
         Get-OcspRevocationConfiguration -Offline | ForEach-Object -Process {
@@ -58,6 +62,10 @@ Function Invoke-CreateRequests {
 
         }
 
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 
 }

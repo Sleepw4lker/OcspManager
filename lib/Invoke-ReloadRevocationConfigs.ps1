@@ -8,6 +8,10 @@ Function Invoke-ReloadRevocationConfigs {
         $ComputerName = $env:computername
     )
 
+    begin {
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
+    }
+
     process {
 
         $OcspAdmin = New-Object -ComObject "CertAdm.OCSPAdmin"
@@ -25,7 +29,6 @@ Function Invoke-ReloadRevocationConfigs {
             # only be triggered by changing a configuration property
             # We simply set the Hash Algorithm to the exact same as before
             $_.HashAlgorithm = $_.HashAlgorithm
-            #$_.Modified
         }
     
         $OcspAdmin.SetConfiguration(
@@ -43,5 +46,9 @@ Function Invoke-ReloadRevocationConfigs {
             Write-Warning "Could not restart the OCSPISAPIAppPool Application Pool as the WebAdministration PowerShell Module seems not to be installed."
         }
 
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 }

@@ -53,6 +53,8 @@ Function New-OCSPRevocationConfiguration {
     )
 
     begin {
+
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
         
         # https://docs.microsoft.com/en-us/windows/win32/api/certadm/nf-certadm-iocspcaconfiguration-get_signingflags
 
@@ -207,6 +209,10 @@ Function New-OCSPRevocationConfiguration {
             # Nothing, yet. Just don't return anything.
         }
 
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 
 }

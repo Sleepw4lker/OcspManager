@@ -8,6 +8,10 @@ Function Invoke-DeleteRevocationConfigs {
         $ComputerName = $env:computername
     )
 
+    begin {
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
+    }
+
     process {
         $OcspAdmin = New-Object -ComObject "CertAdm.OCSPAdmin"
 
@@ -26,5 +30,9 @@ Function Invoke-DeleteRevocationConfigs {
             $ComputerName,
             $True
             )
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 }

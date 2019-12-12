@@ -4,6 +4,8 @@ Function Invoke-Deploy {
     param()
 
     begin {
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
+
         New-Variable -Option Constant -Name ALLOW_INTERACT_WITH_DESKTOP -Value 0x100
     }
 
@@ -80,5 +82,9 @@ Function Invoke-Deploy {
 
         Invoke-CreateRequests
         
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 }

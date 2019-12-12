@@ -32,6 +32,8 @@ Function New-OcspSigningCertificateRequest {
 
     begin {
 
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
+
         New-Variable -Option Constant -Name ContextMachine -Value 0x2
 
         # https://docs.microsoft.com/en-us/windows/desktop/api/certenroll/ne-certenroll-x500nameflags
@@ -154,6 +156,10 @@ Function New-OcspSigningCertificateRequest {
         # Return the CSR
         $TargetCertificateCsr
 
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 
 }

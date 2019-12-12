@@ -10,6 +10,10 @@ Function ConvertTo-BASE64encodedDER {
         $String
     )
 
+    begin {
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
+    }
+
     process {
 
         # Convert to Byte Array
@@ -26,6 +30,10 @@ Function ConvertTo-BASE64encodedDER {
         # Convert Byte Array to BASE64
         [Convert]::ToBase64String($ByteArray)
 
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 
 }

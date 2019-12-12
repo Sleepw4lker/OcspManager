@@ -23,6 +23,8 @@ Function Get-OcspRevocationConfiguration {
     )
 
     begin {
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
+
         # https://docs.microsoft.com/en-us/windows/win32/api/certadm/nf-certadm-iocspcaconfiguration-get_signingflags
         
         # Automatically discover a delegated signing certificate.
@@ -55,6 +57,10 @@ Function Get-OcspRevocationConfiguration {
             $OcspAdmin.OCSPCAConfigurationCollection
         }
 
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 
 }

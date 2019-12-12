@@ -3,6 +3,10 @@ Function Invoke-CreateRevocationConfigs {
     [cmdletbinding()]
     param()
 
+    begin {
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
+    }
+
     process {
 
         $Script:Config.Config.RevocationConfig | ForEach-Object -Process {
@@ -50,5 +54,9 @@ Function Invoke-CreateRevocationConfigs {
     
             }
         }
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 }

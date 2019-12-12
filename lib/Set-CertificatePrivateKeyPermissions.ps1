@@ -17,6 +17,8 @@ Function Set-CertificateKeyPermissions {
     )
 
     begin {
+        Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
+
         New-Variable -Option Constant -Name NCRYPT_SECURITY_DESCR_PROPERTY -Value "Security Descr"
         New-Variable -Option Constant -Name DACL_SECURITY_INFORMATION -Value 4
         New-Variable -Option Constant -Name DotNetFX46 -Value 393295
@@ -82,6 +84,10 @@ Function Set-CertificateKeyPermissions {
             return
         }
 
+    }
+
+    end {
+        Write-Verbose -Message ("Finished {0}" -f $MyInvocation.MyCommand.Name)
     }
 
 }
