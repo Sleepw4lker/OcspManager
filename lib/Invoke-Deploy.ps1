@@ -24,6 +24,13 @@ Function Invoke-Deploy {
             # We assume it is already configured
         }
 
+        # SafeNet HSM require the OCSP Responder to run as the Local SYSTEM Account instead of the NETWORK SERVICE Account
+        If (Test-KspPresence -Ksp "SafeNet Key Storage Provider") { 
+            Get-CimInstance -ClassName Win32_Service -Filter "name='OcspSvc'" |
+                Invoke-CimMethod -Name Change -Arguments @{StartName="LocalSystem"}
+            Restart-Service OcspSvc
+        }
+
         Write-Output "Enabling Firewall Rules..."
 
         Enable-NetFirewallRule `
