@@ -22,7 +22,12 @@ Function Invoke-CreateRequests {
             $Ski = $CaCertificate.Extensions.SubjectKeyIdentifier
 
             # Extract CA Common Name
-            $CaName = $CaCertificate.GetNameInfo(0, $False)
+            # https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.x509certificate2.getnameinfo
+            # https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.x509nametype
+            $CaName = $CaCertificate.GetNameInfo(
+                [System.Security.Cryptography.X509Certificates.X509NameType]::SimpleName, 
+                $False
+                )
 
             $CsrFileName = "$($Script:Config.Config.CsrPath)\$($CAName.Replace(" ","_"))-$($Ski).csr"
 

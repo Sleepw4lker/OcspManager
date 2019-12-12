@@ -24,8 +24,12 @@ Function Get-OcspRevocationConfiguration {
 
     begin {
         # https://docs.microsoft.com/en-us/windows/win32/api/certadm/nf-certadm-iocspcaconfiguration-get_signingflags
-        $OCSP_SF_AUTODISCOVER_SIGNINGCERT 	        = 0x010 # Automatically discover a delegated signing certificate.
-        $OCSP_SF_MANUAL_ASSIGN_SIGNINGCERT 	        = 0x020 # Manually assign a signing certificate.
+        
+        # Automatically discover a delegated signing certificate.
+        New-Variable -Option Constant -Name OCSP_SF_AUTODISCOVER_SIGNINGCERT -Value 0x010
+
+        # Manually assign a signing certificate.
+        New-Variable -Option Constant -Name OCSP_SF_MANUAL_ASSIGN_SIGNINGCERT -Value 0x020
     }
 
     process {
