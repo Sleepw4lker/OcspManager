@@ -33,5 +33,15 @@ Function Invoke-ReloadRevocationConfigs {
             $True
         )
 
+        # Restarting the OCSP Application Pool just as the "Refresh Revocation Data" Option in the GUI would
+        # Try/Catch is just a Safety net in Case the WebAdministration Module is not present
+        Try {
+            Import-Module WebAdministration
+            Restart-WebAppPool -Name OCSPISAPIAppPool
+        }
+        Catch {
+            Write-Warning "Could not restart the OCSPISAPIAppPool Application Pool as the WebAdministration PowerShell Module seems not to be installed."
+        }
+
     }
 }
