@@ -33,7 +33,7 @@ Function Invoke-CreateRequests {
                 $False
                 )
 
-            $CsrFileName = "$($Script:Config.Config.CsrPath)\$($CAName.Replace(" ","_"))-$($Ski).csr"
+            $CsrFileName = "$($Script:Config.Config.CsrPath)\$($ComputerName)-$($CAName.Replace(" ","_"))-$($Ski).csr"
 
             $Arguments = @{
                 CommonName = $ComputerName
