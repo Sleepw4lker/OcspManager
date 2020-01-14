@@ -27,6 +27,12 @@
     5th Step. Identifies Signing Certificates that are not in use and sets the Archive Bit on them so that they disappear from the Certificate Store.
     WARNING: Before running this, ensure that all Revocation Configs have a current Signing Certificate assigned with the -UpdateRevocationConfigs Argument.
 
+    .PARAMETER UnArchiveCerts
+    May be used to un-archive previously archived OCSP Signing Certificates. Warning: Un-Archives all Certificates, which may be a lot.
+
+    .PARAMETER DeleteCerts
+    Same as ArchiveCerts, but the Certificates get hard-deleted, including Private Keys, which may be useful when using a HSM with limited Storage Space.
+
     .PARAMETER Deploy
     Can be used for a quick OCSP Deployment. Installs and configures the Role, then creates Revocation Configs and Requests, if any.
     Assigns existing Signing Certificates and creates Certificate Signing Requests afterwards.
@@ -87,6 +93,20 @@ param(
     )]
     [Switch]
     $ArchiveCerts = $False,
+
+    [Parameter(
+        ParameterSetName="UnArchiveCerts",
+        Mandatory=$True
+    )]
+    [Switch]
+    $UnArchiveCerts = $False,
+
+    [Parameter(
+        ParameterSetName="DeleteCerts",
+        Mandatory=$True
+    )]
+    [Switch]
+    $DeleteCerts = $False,
 
     [Parameter(
         ParameterSetName="Deploy",
@@ -199,6 +219,14 @@ If ($UpdateRevocationConfigs.IsPresent) {
 
 If ($ArchiveCerts.IsPresent) {
     Invoke-ArchiveCerts
+}
+
+If ($UnArchiveCerts.IsPresent) {
+    Invoke-UnArchiveCerts
+}
+
+If ($DeleteCerts.IsPresent) {
+    Invoke-ArchiveCerts -DeleteCerts
 }
 
 If ($Decommission.IsPresent) {

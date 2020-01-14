@@ -1,7 +1,13 @@
 Function Invoke-ArchiveCerts {
 
     [cmdletbinding()]
-    param()
+    param(
+        [Parameter(
+            Mandatory=$False
+        )]
+        [Switch]
+        $DeleteCerts = $False
+    )
 
     begin {
         Write-Verbose -Message ("Invoking {0}" -f $MyInvocation.MyCommand.Name)
@@ -29,6 +35,7 @@ Function Invoke-ArchiveCerts {
             $_.EnhancedKeyUsageList -match $XCN_OID_PKIX_KP_OCSP_SIGNING
         }
 
+        # Warning: Though ForEach-Object would be the more obvious choice, the continue Statement would the behave differently.
         ForEach ($Certificate in $AllCertificates) {
             
             Write-Verbose -Message "Comparing $($Certificate.Thumbprint) against List of configured OCSP Certificates."
@@ -44,9 +51,15 @@ Function Invoke-ArchiveCerts {
 
             }
 
-            # We should get here only if the Thumbprint was not found in any of the Revocation Configs
-            Write-Output "Certificate $($Certificate.Thumbprint) is not in use and will be archived."
-            $Certificate.Archived = $True
+            If ($DeleteCerts.IsPresent) {
+                # We should get here only if the Thumbprint was not found in any of the Revocation Configs
+                Write-Output "Certificate $($Certificate.Thumbprint) is not in use and will be deleted."
+                Remove-Item -Path Cert:\LocalMachine\My\$($Certificate.Thumbprint) -DeleteKey
+            }
+            Else {
+                Write-Output "Certificate $($Certificate.Thumbprint) is not in use and will be archived."
+                $Certificate.Archived = $True
+            }
 
         }
 

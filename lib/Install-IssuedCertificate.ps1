@@ -66,6 +66,7 @@ Function Install-IssuedCertificate {
             )
         }
         Catch {
+            Write-Warning -Message "Unable to install Certificate $($Certificate.Thumbprint). Aborting."
             return $False
         }
 

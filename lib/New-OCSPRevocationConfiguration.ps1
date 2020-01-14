@@ -206,7 +206,7 @@ Function New-OCSPRevocationConfiguration {
             $NewConfig
         }
         Catch {
-            # Nothing, yet. Just don't return anything.
+            Write-Warning -Message "Unable to create OCSP Revocation Configuration. Aborting."
         }
 
     }

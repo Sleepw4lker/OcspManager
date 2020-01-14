@@ -11,6 +11,7 @@ Function Invoke-InstallCerts {
 
         $Files = Get-ChildItem -Path $Script:Config.Config.CerPath | Where-Object { $_.Extension -in ".cer",".crt",".pem",".der" }
         
+        # Warning: Though ForEach-Object would be the more obvious choice, the continue Statement would the behave differently.
         ForEach ($File in $Files) {
     
             Try {
