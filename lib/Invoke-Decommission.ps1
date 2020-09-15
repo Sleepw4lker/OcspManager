@@ -8,7 +8,16 @@ Function Invoke-Decommission {
     }
 
     process {
+
         Invoke-DeleteRevocationConfigs
+
+        Remove-WindowsFeature -Name ADCS-Online-Cert
+
+        Remove-Item `
+            -Path HKLM:\SYSTEM\CurrentControlSet\Services\OCSPSvc\Responder `
+            -Recurse `
+            -Force `
+            -ErrorAction SilentlyContinue
 
         Disable-NetFirewallRule `
             -Name "Microsoft-Windows-OnlineRevocationServices-OcspSvc-DCOM-In"
@@ -17,7 +26,6 @@ Function Invoke-Decommission {
         Disable-NetFirewallRule `
             -Name "Microsoft-Windows-OnlineRevocationServices-OcspSvc-TCP-Out"
 
-        Remove-WindowsFeature -Name ADCS-Online-Cert
     }
 
     end {
